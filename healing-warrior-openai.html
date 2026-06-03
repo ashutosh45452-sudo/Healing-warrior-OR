@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Healing Warrior Voice — Rajan Mahesh</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --earth:#1c1208;--bark:#2e1f0d;--clay:#5c3a1e;
+    --gold:#d4a94a;--cream:#f5eedf;--moss:#4a5c3a;
+    --mist:#9eb0a4;--flame:#c05a1f;--dimcream:rgba(245,238,223,0.7);
+  }
+  body{background:var(--earth);color:var(--cream);font-family:'Lato',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 10%,rgba(212,169,74,.07) 0%,transparent 50%),radial-gradient(ellipse at 80% 85%,rgba(74,92,58,.1) 0%,transparent 50%);pointer-events:none;z-index:0}
+
+  .wrap{position:relative;z-index:2;max-width:880px;margin:0 auto;padding:36px 22px 80px}
+
+  /* HEADER */
+  .hdr{text-align:center;margin-bottom:44px;padding-bottom:32px;border-bottom:1px solid rgba(201,169,110,.18);position:relative}
+  .hdr::after{content:'⁕';position:absolute;bottom:-13px;left:50%;transform:translateX(-50%);color:var(--gold);font-size:18px;background:var(--earth);padding:0 14px}
+  .badge{display:inline-block;font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;opacity:.8}
+  .hdr h1{font-family:'Cinzel',serif;font-size:clamp(24px,4.5vw,46px);font-weight:700;color:var(--cream);line-height:1.1;margin-bottom:8px}
+  .hdr h1 span{color:var(--gold);display:block;font-weight:400;font-size:.6em;letter-spacing:4px;font-family:'Lato',sans-serif;text-transform:uppercase;margin-top:5px}
+  .hdr p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--mist);max-width:440px;margin:0 auto;line-height:1.6}
+
+  /* VOICE PROFILE CARD */
+  .vcard{background:rgba(201,169,110,.06);border:1px solid rgba(201,169,110,.15);border-radius:4px;padding:18px 22px;margin-bottom:24px}
+  .vcard-top{display:flex;align-items:flex-start;gap:16px;margin-bottom:14px}
+  .vavatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--clay),var(--moss));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:2px solid rgba(201,169,110,.3)}
+  .vcard h3{font-family:'Cinzel',serif;font-size:12px;color:var(--gold);margin-bottom:4px;letter-spacing:1px}
+  .vcard .vmeta{font-size:11px;color:var(--mist);line-height:1.6}
+  .vtags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  .vtag{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 9px;border:1px solid rgba(201,169,110,.28);color:var(--gold);border-radius:2px;transition:all .3s}
+  .vtag.new{border-color:rgba(74,92,58,.6);color:#8ec49e;background:rgba(74,92,58,.12)}
+  .vtag.faded{opacity:.35;text-decoration:line-through}
+
+  /* Voice summary */
+  .vsummary{font-size:12px;color:var(--dimcream);line-height:1.75;padding:12px 16px;background:rgba(28,18,8,.4);border-radius:3px;border-left:2px solid rgba(201,169,110,.3)}
+  .vsummary-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);opacity:.6;margin-bottom:6px}
+
+  /* Update status bar */
+  .update-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(201,169,110,.1)}
+  .update-info{font-size:11px;color:var(--mist)}
+  .update-info strong{color:var(--gold);font-weight:400}
+  .btn-refresh{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--mist);background:none;border:1px solid rgba(158,176,164,.25);border-radius:2px;padding:5px 12px;cursor:pointer;font-family:'Lato',sans-serif;transition:all .3s;display:flex;align-items:center;gap:6px}
+  .btn-refresh:hover{color:var(--cream);border-color:rgba(201,169,110,.4)}
+  .btn-refresh:disabled{opacity:.4;cursor:not-allowed}
+  .refresh-spin{width:10px;height:10px;border:1.5px solid rgba(255,255,255,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;display:none}
+
+  /* Changelog */
+  .changelog{display:none;background:rgba(74,92,58,.08);border:1px solid rgba(74,92,58,.25);border-radius:3px;padding:14px 18px;margin-top:12px;font-size:12px;line-height:1.7}
+  .changelog strong{display:block;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#8ec49e;margin-bottom:8px}
+  .changelog ul{list-style:none;padding:0}
+  .changelog li{color:var(--dimcream);padding:2px 0}
+  .changelog li::before{content:'+ ';color:#8ec49e}
+  .changelog li.removed::before{content:'− ';color:#e8906a}
+  .changelog li.removed{color:rgba(245,238,223,.45)}
+
+  /* PANEL */
+  .panel{background:rgba(46,31,13,.5);border:1px solid rgba(201,169,110,.12);border-radius:4px;padding:26px 22px;margin-bottom:20px;backdrop-filter:blur(4px)}
+  .plabel{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:13px;display:flex;align-items:center;gap:10px}
+  .plabel::after{content:'';flex:1;height:1px;background:rgba(201,169,110,.18)}
+
+  .url-row{display:flex;align-items:center}
+  .url-icon{background:rgba(28,18,8,.9);border:1px solid rgba(201,169,110,.2);border-right:none;border-radius:3px 0 0 3px;padding:0 13px;height:48px;display:flex;align-items:center;font-size:17px;flex-shrink:0}
+  #reel-url{flex:1;background:rgba(28,18,8,.7);border:1px solid rgba(201,169,110,.2);border-radius:0 3px 3px 0;color:var(--cream);font-family:'Lato',sans-serif;font-size:14px;font-weight:300;padding:0 15px;height:48px;outline:none;transition:border-color .3s;width:100%}
+  #reel-url:focus{border-color:rgba(201,169,110,.5)}
+  #reel-url::placeholder{color:rgba(158,176,164,.35);font-style:italic}
+  .url-hint{font-size:11px;color:rgba(158,176,164,.4);margin-top:7px;font-style:italic}
+
+  textarea{width:100%;background:rgba(28,18,8,.7);border:1px solid rgba(201,169,110,.2);border-radius:3px;color:var(--cream);font-family:'Lato',sans-serif;font-size:14px;font-weight:300;line-height:1.7;padding:13px 15px;resize:vertical;outline:none;transition:border-color .3s}
+  textarea:focus{border-color:rgba(201,169,110,.5)}
+  textarea::placeholder{color:rgba(158,176,164,.35);font-style:italic}
+
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+  .ogrp label{display:block;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;opacity:.7}
+  select{width:100%;background:rgba(28,18,8,.7);border:1px solid rgba(201,169,110,.2);border-radius:3px;color:var(--cream);font-family:'Lato',sans-serif;font-size:13px;padding:10px 12px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23c9a96e' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+  select option{background:var(--bark)}
+
+  .btn-gen{width:100%;background:linear-gradient(135deg,var(--clay),var(--flame));border:none;border-radius:3px;color:var(--cream);font-family:'Cinzel',serif;font-size:13px;letter-spacing:3px;text-transform:uppercase;padding:17px 24px;cursor:pointer;margin-top:22px;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:10px}
+  .btn-gen:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(192,90,31,.25)}
+  .btn-gen:active{transform:translateY(0)}
+  .btn-gen:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+  /* Status steps */
+  .status-bar{display:none;background:rgba(28,18,8,.55);border:1px solid rgba(201,169,110,.12);border-radius:3px;padding:16px 18px;margin-top:18px}
+  .steps{display:flex;flex-direction:column;gap:9px}
+  .step{display:flex;align-items:center;gap:11px;font-size:13px;color:rgba(158,176,164,.45);transition:color .4s}
+  .step.active{color:var(--cream)}
+  .step.done{color:var(--moss)}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(158,176,164,.18);flex-shrink:0;transition:background .4s}
+  .step.active .dot{background:var(--gold);box-shadow:0 0 5px rgba(212,169,74,.5);animation:pdot 1s infinite}
+  .step.done .dot{background:var(--moss)}
+  @keyframes pdot{0%,100%{opacity:1}50%{opacity:.35}}
+
+  /* Fetched preview */
+  .fetched-prev{display:none;background:rgba(74,92,58,.1);border:1px solid rgba(74,92,58,.28);border-radius:3px;padding:12px 16px;margin-top:14px;font-size:12px;color:var(--mist);line-height:1.7}
+  .fetched-prev strong{display:block;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#8ec49e;margin-bottom:5px}
+
+  /* Error */
+  .err{background:rgba(192,90,31,.1);border:1px solid rgba(192,90,31,.3);border-radius:3px;padding:13px 16px;font-size:13px;color:#e8906a;margin-top:16px;display:none;line-height:1.6}
+
+  /* Results */
+  .results{display:none;margin-top:6px}
+  .res-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .res-hdr h3{font-family:'Cinzel',serif;font-size:13px;color:var(--gold);letter-spacing:2px}
+  .regen-btn{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--mist);background:none;border:1px solid rgba(158,176,164,.3);border-radius:2px;padding:6px 13px;cursor:pointer;font-family:'Lato',sans-serif;transition:all .3s}
+  .regen-btn:hover{color:var(--cream);border-color:rgba(201,169,110,.4)}
+
+  .ccard{background:rgba(28,18,8,.8);border:1px solid rgba(201,169,110,.16);border-radius:4px;padding:20px 20px 20px 20px;margin-bottom:13px;position:relative;cursor:pointer;transition:all .3s}
+  .ccard:hover{border-color:rgba(201,169,110,.5);background:rgba(46,31,13,.88)}
+  .ccard.copied{border-color:rgba(74,92,58,.65)}
+  .cnum{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);opacity:.5;margin-bottom:9px}
+  .ctext{font-family:'Cormorant Garamond',serif;font-size:17px;line-height:1.8;color:var(--cream);white-space:pre-wrap;padding-right:56px}
+  .chint{position:absolute;top:14px;right:14px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mist);opacity:0;transition:opacity .3s}
+  .ccard:hover .chint{opacity:.45}
+  .cmsg{position:absolute;top:14px;right:14px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#6aaa80;display:none}
+  .ccard.copied .chint{display:none}
+  .ccard.copied .cmsg{display:block}
+
+  .spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  @media(max-width:580px){.opts{grid-template-columns:1fr}.panel{padding:20px 15px}.ctext{font-size:15px}}
+
+  /* API KEY SETUP SCREEN */
+  .setup-overlay{position:fixed;inset:0;background:var(--earth);z-index:100;display:flex;align-items:center;justify-content:center;padding:24px}
+  .setup-box{max-width:420px;width:100%;text-align:center}
+  .setup-box .setup-icon{font-size:40px;margin-bottom:20px}
+  .setup-box h2{font-family:'Cinzel',serif;font-size:22px;color:var(--cream);margin-bottom:8px}
+  .setup-box p{font-size:13px;color:var(--mist);line-height:1.7;margin-bottom:24px}
+  .setup-box p a{color:var(--gold);text-decoration:none}
+  .key-input-wrap{position:relative;margin-bottom:12px}
+  .key-input-wrap input{width:100%;background:rgba(28,18,8,.9);border:1px solid rgba(201,169,110,.3);border-radius:3px;color:var(--cream);font-family:'Lato',sans-serif;font-size:13px;padding:14px 44px 14px 16px;outline:none;transition:border-color .3s;letter-spacing:.5px}
+  .key-input-wrap input:focus{border-color:rgba(201,169,110,.6)}
+  .key-input-wrap input::placeholder{color:rgba(158,176,164,.4);font-style:italic;letter-spacing:0}
+  .toggle-key{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--mist);cursor:pointer;font-size:16px;padding:4px}
+  .setup-hint{font-size:11px;color:rgba(158,176,164,.4);margin-bottom:20px;line-height:1.6;font-style:italic}
+  .btn-setup{width:100%;background:linear-gradient(135deg,var(--clay),var(--flame));border:none;border-radius:3px;color:var(--cream);font-family:'Cinzel',serif;font-size:13px;letter-spacing:3px;text-transform:uppercase;padding:16px;cursor:pointer;transition:all .3s}
+  .btn-setup:hover{opacity:.9}
+  .setup-err{font-size:12px;color:#e8906a;margin-top:10px;display:none}
+
+  /* API key badge in header */
+  .key-badge{display:inline-flex;align-items:center;gap:6px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--moss);background:rgba(74,92,58,.12);border:1px solid rgba(74,92,58,.3);border-radius:2px;padding:4px 10px;margin-top:12px;cursor:pointer;transition:all .3s}
+  .key-badge:hover{border-color:rgba(74,92,58,.6);color:#8ec49e}
+  .key-dot{width:6px;height:6px;border-radius:50%;background:var(--moss)}
+</style>
+</head>
+<body>
+<!-- API KEY SETUP OVERLAY -->
+<div class="setup-overlay" id="setup-overlay">
+  <div class="setup-box">
+    <div class="setup-icon">🗝️</div>
+    <h2>Connect Your API Key</h2>
+    <p>This app calls the Anthropic Claude API directly from your browser. You need a free API key from <a href="https://platform.openai.com" target="_blank">platform.openai.com</a> to use it.<br><br>Your key is saved only on this device — never sent anywhere else.</p>
+    <div class="key-input-wrap">
+      <input type="password" id="api-key-input" placeholder="sk-api03-…" autocomplete="off" autocorrect="off" spellcheck="false">
+      <button class="toggle-key" onclick="toggleKeyVis()" id="eye-btn">👁</button>
+    </div>
+    <p class="setup-hint">Your key stays in your browser's local storage. It's never shared or logged.</p>
+    <button class="btn-setup" onclick="saveApiKey()">Save & Start Using</button>
+    <div class="setup-err" id="setup-err"></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="badge">⚔ Healing Warrior Tribe</div>
+    <h1>Voice of Rajan<span>Self-Updating Comment Agent</span></h1>
+    <p>Paste a reel URL. The agent analyses it and comments in Rajan's living, evolving voice — updated weekly from his latest content.</p>
+    <div class="key-badge" onclick="changeApiKey()" title="Change API key">
+      <div class="key-dot"></div>
+      <span id="key-status-text">API Key Connected</span>
+    </div>
+  </div>
+
+  <!-- VOICE PROFILE (dynamic) -->
+  <div class="vcard">
+    <div class="vcard-top">
+      <div class="vavatar">🌿</div>
+      <div>
+        <h3>Rajan Mahesh — Live Voice Profile</h3>
+        <div class="vmeta" id="vmeta">Loading voice profile…</div>
+      </div>
+    </div>
+    <div class="vtags" id="vtags-container"></div>
+    <div>
+      <div class="vsummary-label">Current Voice Essence</div>
+      <div class="vsummary" id="vsummary">Initialising…</div>
+    </div>
+    <div class="update-bar">
+      <div class="update-info">
+        Last updated: <strong id="last-updated">Never</strong> &nbsp;·&nbsp;
+        Next auto-update: <strong id="next-update">—</strong>
+      </div>
+      <button class="btn-refresh" id="refresh-btn" onclick="refreshVoiceProfile()">
+        <div class="refresh-spin" id="rspin"></div>
+        <span id="rbtn-text">↻ Refresh Voice Now</span>
+      </button>
+    </div>
+    <div class="changelog" id="changelog">
+      <strong>What changed in this update</strong>
+      <ul id="changelog-list"></ul>
+    </div>
+  </div>
+
+  <!-- INPUT PANEL -->
+  <div class="panel">
+    <div class="plabel">Paste the Reel or Post URL</div>
+    <div class="url-row">
+      <div class="url-icon">🔗</div>
+      <input type="url" id="reel-url" placeholder="https://www.instagram.com/reel/… or youtube.com/shorts/…">
+    </div>
+    <p class="url-hint">Instagram reels, posts, YouTube Shorts — paste and go. For private posts, use the context box below.</p>
+
+    <div style="margin-top:18px">
+      <div class="plabel">Extra Context <span style="font-size:9px;opacity:.45;letter-spacing:1px;text-transform:uppercase;font-family:Lato,sans-serif;font-weight:300;margin-left:6px">(optional)</span></div>
+      <textarea id="extra-ctx" rows="2" placeholder="Add caption text, creator info, or post theme if the URL is private or restricted…"></textarea>
+    </div>
+
+    <div class="opts">
+      <div class="ogrp">
+        <label>Comment Energy</label>
+        <select id="ctone">
+          <option value="warrior-affirm">Warrior Affirmation</option>
+          <option value="wisdom-drop">Wisdom Drop</option>
+          <option value="gentle-truth">Gentle Raw Truth</option>
+          <option value="community-call">Tribe Call-In</option>
+          <option value="question-spark">Deep Question</option>
+        </select>
+      </div>
+      <div class="ogrp">
+        <label>Comment Length</label>
+        <select id="clength">
+          <option value="short">Short — 1 to 2 lines</option>
+          <option value="medium" selected>Medium — 3 to 4 lines</option>
+          <option value="long">Long — 5 to 7 lines</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn-gen" id="gen-btn" onclick="run()">
+      <span id="btn-text">Analyse & Generate Comments</span>
+      <div class="spin" id="gspinner" style="display:none"></div>
+    </button>
+
+    <div class="status-bar" id="sbar">
+      <div class="steps">
+        <div class="step" id="s1"><div class="dot"></div>Reading the reel URL…</div>
+        <div class="step" id="s2"><div class="dot"></div>Analysing content, caption & themes…</div>
+        <div class="step" id="s3"><div class="dot"></div>Channelling Rajan's current voice…</div>
+        <div class="step" id="s4"><div class="dot"></div>Writing your comments…</div>
+      </div>
+    </div>
+
+    <div class="fetched-prev" id="fprev">
+      <strong>✓ Post Context Understood</strong>
+      <span id="fprev-text"></span>
+    </div>
+    <div class="err" id="err"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results" id="results">
+    <div class="res-hdr">
+      <h3>Generated Comments</h3>
+      <button class="regen-btn" onclick="run()">↺ Regenerate</button>
+    </div>
+    <div id="cards"></div>
+  </div>
+
+</div>
+
+<script>
+// ─── STORAGE KEYS ───────────────────────────────────────────────
+const KEY_PROFILE   = 'hwt_voice_profile';
+const KEY_UPDATED   = 'hwt_last_updated';
+const KEY_NEXT      = 'hwt_next_update';
+const KEY_CHANGELOG = 'hwt_changelog';
+const KEY_APIKEY    = 'hwt_api_key';
+const WEEK_MS       = 7 * 24 * 60 * 60 * 1000;
+
+// ─── API KEY MANAGEMENT ──────────────────────────────────────────
+function getApiKey() {
+  return localStorage.getItem(KEY_APIKEY) || '';
+}
+
+function saveApiKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val.startsWith('sk-')) {
+    document.getElementById('setup-err').textContent = "That doesn't look like a valid OpenAI key. It should start with sk-";
+    document.getElementById('setup-err').style.display = 'block';
+    return;
+  }
+  localStorage.setItem(KEY_APIKEY, val);
+  document.getElementById('setup-overlay').style.display = 'none';
+  document.getElementById('key-status-text').textContent = 'API Key: ' + val.slice(0,12) + '…';
+  loadProfile();
+  renderProfileCard();
+  checkAutoUpdate();
+}
+
+function changeApiKey() {
+  document.getElementById('api-key-input').value = getApiKey();
+  document.getElementById('setup-overlay').style.display = 'flex';
+}
+
+function toggleKeyVis() {
+  const inp = document.getElementById('api-key-input');
+  const btn = document.getElementById('eye-btn');
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁'; }
+}
+
+function apiHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + getApiKey()
+  };
+}
+
+// ─── DEFAULT VOICE PROFILE (seed — will be overwritten after first refresh) ─
+const DEFAULT_PROFILE = {
+  summary: "Ancient warrior grounded in lived experience. Speaks from the body, not the mind. Merges Siddha lineage, Karlakattai training, and nervous system healing into direct, earthy truths. Never performs wellness — embodies it.",
+  themes: ["Nervous system healing","Karlakattai warrior practice","Siddha tradition","Breathwork & pranayama","Ancestral wisdom","Body-first healing","Men's emotional health","Tribe & brotherhood","Somatic trauma release","Nature as teacher"],
+  phrases: ["the body knows","this is the work","your nervous system is listening","come home to yourself","the warrior path","this is real","ancient practice","root down to rise","brother / sister","stillness before storm"],
+  tone_notes: "Short declarative punches followed by expansions. Ends with invitations, never commands. Nature metaphors — roots, fire, earth, breath. Rare emojis used with intention: 🌿 🔥 ⚔️ 🙏 🌳. No toxic positivity. No hollow praise.",
+  avoid: ["love this!","amazing content!","so inspiring!","crushing it","great post","keep it up"]
+};
+
+// ─── STATE ──────────────────────────────────────────────────────
+let voiceProfile = null;
+
+// ─── INIT ────────────────────────────────────────────────────────
+window.addEventListener('load', async () => {
+  const key = getApiKey();
+  if (!key) {
+    // Show setup screen
+    document.getElementById('setup-overlay').style.display = 'flex';
+  } else {
+    document.getElementById('setup-overlay').style.display = 'none';
+    document.getElementById('key-status-text').textContent = 'API Key: ' + key.slice(0,12) + '…';
+    loadProfile();
+    renderProfileCard();
+    checkAutoUpdate();
+  }
+});
+
+function loadProfile() {
+  try {
+    const stored = localStorage.getItem(KEY_PROFILE);
+    voiceProfile = stored ? JSON.parse(stored) : DEFAULT_PROFILE;
+  } catch { voiceProfile = DEFAULT_PROFILE; }
+}
+
+function saveProfile(p) {
+  voiceProfile = p;
+  try { localStorage.setItem(KEY_PROFILE, JSON.stringify(p)); } catch {}
+}
+
+function renderProfileCard() {
+  const now = localStorage.getItem(KEY_UPDATED);
+  const next = localStorage.getItem(KEY_NEXT);
+  document.getElementById('last-updated').textContent = now ? fmtDate(parseInt(now)) : 'Never (using seed profile)';
+  document.getElementById('next-update').textContent = next ? fmtDate(parseInt(next)) : 'After first refresh';
+  document.getElementById('vmeta').textContent = `${voiceProfile.themes.length} active themes · ${voiceProfile.phrases.length} signature phrases`;
+  document.getElementById('vsummary').textContent = voiceProfile.summary;
+
+  const tc = document.getElementById('vtags-container');
+  tc.innerHTML = '';
+  voiceProfile.themes.forEach(t => {
+    const el = document.createElement('span');
+    el.className = 'vtag';
+    el.textContent = t;
+    tc.appendChild(el);
+  });
+}
+
+function renderChangelog(changes) {
+  if (!changes || (!changes.added?.length && !changes.removed?.length && !changes.updated?.length)) return;
+  const box = document.getElementById('changelog');
+  const ul = document.getElementById('changelog-list');
+  ul.innerHTML = '';
+  (changes.added || []).forEach(s => { const li=document.createElement('li'); li.textContent=s; ul.appendChild(li); });
+  (changes.removed || []).forEach(s => { const li=document.createElement('li'); li.className='removed'; li.textContent=s; ul.appendChild(li); });
+  (changes.updated || []).forEach(s => { const li=document.createElement('li'); li.textContent='Updated: '+s; ul.appendChild(li); });
+  box.style.display = 'block';
+}
+
+function checkAutoUpdate() {
+  const nextTs = parseInt(localStorage.getItem(KEY_NEXT) || '0');
+  const lastTs = parseInt(localStorage.getItem(KEY_UPDATED) || '0');
+  // If never updated OR past due — trigger refresh silently in background
+  if (!lastTs || Date.now() > nextTs) {
+    setTimeout(() => refreshVoiceProfile(true), 2000); // 2s delay so UI loads first
+  }
+}
+
+// ─── VOICE REFRESH ───────────────────────────────────────────────
+async function refreshVoiceProfile(silent = false) {
+  const btn = document.getElementById('refresh-btn');
+  const rspin = document.getElementById('rspin');
+  const rbtext = document.getElementById('rbtn-text');
+  btn.disabled = true;
+  rspin.style.display = 'block';
+  rbtext.textContent = 'Updating…';
+
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: apiHeaders(),
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        max_tokens: 1200,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a voice analyst specialising in social media content creators. Return ONLY valid JSON — no markdown, no backticks, no preamble.'
+          },
+          {
+            role: 'user',
+            content: `You know Rajan Mahesh from "Healing Warrior Tribe" — an Indian wellness creator on Instagram and YouTube who teaches Karlakattai warrior training, Siddha healing, nervous system regulation, breathwork, and ancestral wisdom.
+
+Based on everything you know about his content style, voice, and evolving beliefs, generate a current voice profile.
+
+Return this exact JSON (raw JSON only, no markdown):
+{
+  "summary": "2-3 sentence description of his current voice and focus",
+  "themes": ["8-12 themes he actively talks about"],
+  "phrases": ["8-12 actual phrases or expressions he uses"],
+  "tone_notes": "description of his tone, rhythm, style, and delivery",
+  "avoid": ["phrases or styles that do NOT match him"],
+  "changelog": {
+    "added": ["themes prominent in his recent content"],
+    "removed": ["topics he seems to have moved away from"],
+    "updated": ["shifts in how he communicates"]
+  }
+}`
+          }
+        ]
+      })
+    });
+
+    if (!res.ok) throw new Error(`API ${res.status}`);
+    const data = await res.json();
+
+    const rawText = data.choices[0].message.content.trim();
+
+    // Try to extract JSON
+    let parsed;
+    try {
+      // Strip markdown fences if present
+      const clean = rawText.replace(/```json|```/g, '').trim();
+      const jsonMatch = clean.match(/\{[\s\S]*\}/);
+      parsed = JSON.parse(jsonMatch ? jsonMatch[0] : clean);
+    } catch {
+      throw new Error('Could not parse profile JSON from response');
+    }
+
+    const oldProfile = JSON.parse(JSON.stringify(voiceProfile));
+    const newProfile = {
+      summary: parsed.summary || oldProfile.summary,
+      themes: parsed.themes || oldProfile.themes,
+      phrases: parsed.phrases || oldProfile.phrases,
+      tone_notes: parsed.tone_notes || oldProfile.tone_notes,
+      avoid: parsed.avoid || oldProfile.avoid
+    };
+
+    saveProfile(newProfile);
+    const now = Date.now();
+    localStorage.setItem(KEY_UPDATED, now.toString());
+    localStorage.setItem(KEY_NEXT, (now + WEEK_MS).toString());
+    if (parsed.changelog) {
+      localStorage.setItem(KEY_CHANGELOG, JSON.stringify(parsed.changelog));
+    }
+
+    renderProfileCard();
+    if (parsed.changelog) renderChangelog(parsed.changelog);
+
+    if (!silent) {
+      // Flash the tags to show new ones
+      highlightNewThemes(oldProfile.themes, newProfile.themes);
+    }
+
+  } catch (e) {
+    if (!silent) {
+      showErr('Voice update failed: ' + e.message + '. Using existing profile.');
+    }
+  } finally {
+    btn.disabled = false;
+    rspin.style.display = 'none';
+    rbtext.textContent = '↻ Refresh Voice Now';
+  }
+}
+
+function highlightNewThemes(oldThemes, newThemes) {
+  const oldSet = new Set(oldThemes.map(t => t.toLowerCase()));
+  const tags = document.querySelectorAll('#vtags-container .vtag');
+  tags.forEach(tag => {
+    if (!oldSet.has(tag.textContent.toLowerCase())) {
+      tag.classList.add('new');
+      setTimeout(() => tag.classList.remove('new'), 8000);
+    }
+  });
+}
+
+// ─── COMMENT GENERATION ──────────────────────────────────────────
+function buildSystemPrompt() {
+  const p = voiceProfile;
+  return `You are a voice-mimicry engine trained on Rajan Mahesh, founder of Healing Warrior Tribe.
+
+CURRENT VOICE PROFILE (updated ${fmtDate(parseInt(localStorage.getItem(KEY_UPDATED)||'0'))}):
+
+VOICE ESSENCE:
+${p.summary}
+
+ACTIVE THEMES (what he's currently talking about):
+${p.themes.join(', ')}
+
+SIGNATURE PHRASES (use naturally, not all at once):
+${p.phrases.join(' · ')}
+
+TONE & STYLE:
+${p.tone_notes}
+
+NEVER USE:
+${p.avoid.join(', ')}
+
+CORE RULES:
+- Engage with the SPECIFIC content of the post — never generic
+- Speak from lived experience, not observation
+- Write AS Rajan — not introducing himself, just speaking
+- No hollow filler. No toxic positivity. No brand-speak.
+- Return ONLY the comment text. No labels, no explanations.`;
+}
+
+function buildUserPrompt(ctx, tone, length) {
+  const toneMap = {
+    'warrior-affirm':'Warrior affirmation — validate the practice with depth, honour the courage it takes to walk this path',
+    'wisdom-drop':'A piece of ancient Siddha or warrior wisdom that illuminates what this post is touching',
+    'gentle-truth':'A gentle but raw truth about what this content touches — something people often avoid or haven\'t named yet',
+    'community-call':'Call people into the tribe feeling — shared journey, belonging, we-are-doing-this-together',
+    'question-spark':'One deep, meaningful question that makes someone pause mid-scroll and look inward'
+  };
+  const lenMap = {
+    'short':'1–2 lines. Punchy and direct. Lands like a stone on still water.',
+    'medium':'3–4 lines. Build a thought, let it breathe, land it.',
+    'long':'5–7 lines. A complete, textured thought. Use intentional line breaks for rhythm.'
+  };
+  return `Post context:\n---\n${ctx}\n---\n\nGenerate 3 distinct Instagram comments in Rajan Mahesh's voice.\n\nComment energy: ${toneMap[tone]}\nLength: ${lenMap[length]}\n\nSeparate each with this exact line: ---COMMENT---\n\nFormat:\n---COMMENT---\n[comment 1]\n---COMMENT---\n[comment 2]\n---COMMENT---\n[comment 3]`;
+}
+
+async function run() {
+  const url = document.getElementById('reel-url').value.trim();
+  const extra = document.getElementById('extra-ctx').value.trim();
+  const tone = document.getElementById('ctone').value;
+  const length = document.getElementById('clength').value;
+
+  if (!url && !extra) { showErr('Paste a reel URL or describe the post in the context box.'); return; }
+
+  hideErr();
+  setGenLoading(true);
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('fprev').style.display = 'none';
+  const sbar = document.getElementById('sbar');
+  sbar.style.display = 'block';
+  setStep(1);
+
+  try {
+    let postCtx = '';
+
+    if (url) {
+      setStep(1); await delay(300);
+      setStep(2);
+
+      const r = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: apiHeaders(),
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          max_tokens: 800,
+          messages: [
+            { role: 'system', content: 'You are a content analyst. When given a social media URL or description, summarise the post: main topic, theme, content type (breathwork/movement/mindset/healing/nutrition/etc), emotional tone, and key concepts. Plain text only — no preamble.' },
+            { role: 'user', content: `Summarise this post/reel: ${url}${extra ? '\nExtra context: '+extra : ''}` }
+          ]
+        })
+      });
+      if (!r.ok) throw new Error(`API ${r.status}`);
+      const d = await r.json();
+      postCtx = d.choices[0].message.content.trim() || extra || url;
+    } else {
+      postCtx = extra;
+    }
+
+    document.getElementById('fprev-text').textContent = postCtx.slice(0, 240) + (postCtx.length > 240 ? '…' : '');
+    document.getElementById('fprev').style.display = 'block';
+
+    setStep(3); await delay(250); setStep(4);
+
+    const g = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: apiHeaders(),
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        max_tokens: 1000,
+        messages: [
+          { role: 'system', content: buildSystemPrompt() },
+          { role: 'user', content: buildUserPrompt(postCtx, tone, length) }
+        ]
+      })
+    });
+    if (!g.ok) throw new Error(`API ${g.status}`);
+    const gd = await g.json();
+    const raw = gd.choices[0].message.content.trim();
+    const comments = raw.split('---COMMENT---').map(s=>s.trim()).filter(Boolean);
+    if (!comments.length) throw new Error('No comments returned');
+
+    sbar.style.display = 'none';
+    renderCards(comments);
+  } catch(e) {
+    sbar.style.display = 'none';
+    showErr('Something went wrong: '+e.message+'\n\nIf the URL is private, paste the caption in the context box.');
+  } finally {
+    setGenLoading(false);
+  }
+}
+
+function renderCards(comments) {
+  const c = document.getElementById('cards');
+  c.innerHTML = '';
+  comments.forEach((txt, i) => {
+    const d = document.createElement('div');
+    d.className = 'ccard';
+    d.innerHTML = `<div class="cnum">Option ${i+1}</div><div class="ctext">${esc(txt)}</div><span class="chint">Tap to Copy</span><span class="cmsg">✓ Copied</span>`;
+    d.addEventListener('click', () => {
+      navigator.clipboard.writeText(txt).then(() => {
+        d.classList.add('copied');
+        setTimeout(() => d.classList.remove('copied'), 2500);
+      });
+    });
+    c.appendChild(d);
+  });
+  const r = document.getElementById('results');
+  r.style.display = 'block';
+  r.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ─── UTILS ───────────────────────────────────────────────────────
+function setStep(n) {
+  for (let i=1;i<=4;i++) {
+    const el = document.getElementById(`s${i}`);
+    el.className = 'step' + (i<n?' done':i===n?' active':'');
+  }
+}
+function setGenLoading(on) {
+  document.getElementById('gen-btn').disabled = on;
+  document.getElementById('btn-text').style.display = on ? 'none' : 'inline';
+  document.getElementById('gspinner').style.display = on ? 'block' : 'none';
+}
+function showErr(msg) {
+  const el = document.getElementById('err');
+  el.innerHTML = msg.replace(/\n/g,'<br>');
+  el.style.display = 'block';
+}
+function hideErr() { document.getElementById('err').style.display = 'none'; }
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+function fmtDate(ts) {
+  if (!ts) return 'Never';
+  const d = new Date(ts);
+  return d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+</script>
+</body>
+</html>
